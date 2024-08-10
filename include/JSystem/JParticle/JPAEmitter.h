@@ -124,10 +124,10 @@ public:
     /* 0x130 */ f32 mVolumeSize;
     /* 0x134 */ s32 mVolumeEmitCount;
     /* 0x138 */ s32 mVolumeEmitIdx;
-    /* 0x13C */ u32 mVolumeEmitAngleCount;
-    /* 0x140 */ u32 mVolumeEmitXCount;
-    /* 0x144 */ u32 mVolumeEmitAngleMax;
-    /* 0x148 */ u32 mDivNumber;
+    /* 0x13C */ s32 mVolumeEmitAngleCount;
+    /* 0x140 */ s32 mVolumeEmitXCount;
+    /* 0x144 */ s32 mVolumeEmitAngleMax;
+    /* 0x148 */ s32 mDivNumber;
 };
 
 struct JPAFrameManager {
@@ -266,6 +266,8 @@ public:
         stopCreateParticle();
     }
 
+    bool isZDraw() { return mDraw.isZDraw(); }
+
     void setEmitterCallBackPtr(JPACallBackBase<JPABaseEmitter*>* callback) {
         mpEmitterCallBack = callback;
     }
@@ -274,6 +276,8 @@ public:
     }
     void setParticleList(JSUList<JPABaseParticle>* list) { mpPtclVacList = list; }
     void setFieldList(JSUList<JPAFieldData>* list) { mFieldManager.mVacList = list; }
+    JSUList<JPABaseParticle>* getParticleList() { return &mActiveParticles; }
+    JSUList<JPABaseParticle>* getChildParticleList() { return &mChildParticles; }
     JSULink<JPABaseEmitter>* getLinkBufferPtr() { return &mLink; }
     void initDrawMgr(JPATextureResource* texRes) { mDraw.initialize(this, texRes); }
     void draw(MtxP cameraMtxP) { mDraw.draw(cameraMtxP); }
@@ -294,15 +298,12 @@ public:
     void getBaseEnvColor(GXColor&) {}
     void getBasePrmColor(GXColor&) {}
     void getCamMtxPtr() {}
-    JSUList<JPABaseParticle>* getChildParticleList() { return &mChildParticles; }
     void getCurrentCreateNumber() const {}
     void getFrame() {}
     void getGlobalParticleScale(JGeometry::TVec3<f32>&) const {}
-    JSUList<JPABaseParticle>* getParticleList() { return &mActiveParticles; }
     void getgReRDirection(JGeometry::TVec3<f32>&) {}
     void isChildDraw() {}
     void isContinuousParticle() {}
-    bool isZDraw() { return mDraw.isZDraw(); }
     void loadTexture(u8, GXTexMapID) {}
     void setEmitterRotation(const JGeometry::TVec3<s16>&) {}
     void setGlobalParticleHeightScale(f32) {}

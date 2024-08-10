@@ -241,7 +241,7 @@ void JPADrawExecRegisterPrmAEnv::exec(const JPADrawContext* pDC, JPABaseParticle
 
 /* 80260858-80260B68       .text exec__20JPADrawExecSetTexMtxFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawExecSetTexMtx::exec(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
-    s32 tick = ptcl->mCurFrame;
+    s32 tick = ptcl->getAge();
     f32 tilingX = 0.5f * pDC->pbsp->getTilingX();
     f32 tilingY = 0.5f * pDC->pbsp->getTilingY();
     f32 transX = tick * pDC->pbsp->getTexScrollTransX() + pDC->pbsp->getTexStaticTransX();
@@ -577,9 +577,9 @@ void JPADrawExecRotationCross::exec(const JPADrawContext* pDC, JPABaseParticle* 
     pt[2].set(x1, y1, 0.0f);
     pt[3].set(x0, y1, 0.0f);
 
-    f32 x2 = (x1 + x0) / 2.0f;
-    f32 z0 = (x1 - x0) / 2.0f;
-    f32 z1 = (x0 - x1) / 2.0f;
+    f32 x2 = (x1 + x0) * 0.5f;
+    f32 z0 = (x1 - x0) * 0.5f;
+    f32 z1 = (x0 - x1) * 0.5f;
     pt[4].set(x2, y0, z0);
     pt[5].set(x2, y0, z1);
     pt[6].set(x2, y1, z1);
@@ -748,10 +748,11 @@ void JPADrawCalcColorAnmFrameRepeat::calc(const JPADrawContext* pDC) {
 
 /* 802648E0-8026495C       .text calc__31JPADrawCalcColorAnmFrameReverseFPC14JPADrawContext */
 void JPADrawCalcColorAnmFrameReverse::calc(const JPADrawContext* pDC) {
-    /* Nonmatching */
     s32 tick = pDC->pbe->mTick.getFrame();
-    s32 frame = tick / pDC->pbsp->getColorRegAnmMaxFrm();
-    JPADrawContext::pcb->mColorAnmFrame = frame;
+    s32 maxFrame = pDC->pbsp->getColorRegAnmMaxFrm();
+    s32 odd = (tick / maxFrame) & 1; // whether we're on an even or odd loop
+    s32 frame = tick % maxFrame;
+    JPADrawContext::pcb->mColorAnmFrame = frame + (odd * maxFrame) - 2 * (odd * frame);
 }
 
 /* 8026495C-8026496C       .text calc__29JPADrawCalcColorAnmFrameMergeFPC14JPADrawContext */
@@ -773,26 +774,27 @@ void JPADrawCalcTextureAnmIndexNormal::calc(const JPADrawContext* pDC) {
 
 /* 80264A34-80264AD0       .text calc__32JPADrawCalcTextureAnmIndexRepeatFPC14JPADrawContext */
 void JPADrawCalcTextureAnmIndexRepeat::calc(const JPADrawContext* pDC) {
-    /* Nonmatching */
-    f32 tick = pDC->pbe->mTick.getFrame();
-    s32 maxFrame = pDC->pbsp->getTextureAnmKeyNum();
-    s32 idx = pDC->pbsp->getTextureIndex((s32)tick % maxFrame);
-    pDC->mpDraw->mTexIdx = pDC->pTexIdx[idx];
+    s32 tick = pDC->pbe->mTick.getFrame();
+    pDC->mpDraw->mTexIdx = pDC->pTexIdx[pDC->pbsp->getTextureIndex(tick % pDC->pbsp->getTextureAnmKeyNum())];
 }
 
 /* 80264AD0-80264B80       .text calc__33JPADrawCalcTextureAnmIndexReverseFPC14JPADrawContext */
 void JPADrawCalcTextureAnmIndexReverse::calc(const JPADrawContext* pDC) {
-    /* Nonmatching */
+    s32 tick = pDC->pbe->mTick.getFrame();
+    s32 maxFrame = pDC->pbsp->getTextureAnmKeyNum() - 1;
+    s32 odd = (tick / maxFrame) & 1; // whether we're on an even or odd loop
+    s32 frame = tick % maxFrame;
+    pDC->mpDraw->mTexIdx = pDC->pTexIdx[pDC->pbsp->getTextureIndex(frame + (odd * maxFrame) - 2 * (odd * frame))];
 }
 
 /* 80264B80-80264BC8       .text calc__31JPADrawCalcTextureAnmIndexMergeFPC14JPADrawContext */
 void JPADrawCalcTextureAnmIndexMerge::calc(const JPADrawContext* pDC) {
-    /* Nonmatching */
+    pDC->mpDraw->mTexIdx = pDC->pbsp->getTextureIndex();
 }
 
 /* 80264BC8-80264C10       .text calc__32JPADrawCalcTextureAnmIndexRandomFPC14JPADrawContext */
 void JPADrawCalcTextureAnmIndexRandom::calc(const JPADrawContext* pDC) {
-    /* Nonmatching */
+    pDC->mpDraw->mTexIdx = pDC->pbsp->getTextureIndex();
 }
 
 /* 80264C10-80264C4C       .text exec__19JPADrawExecCallBackFPC14JPADrawContext */
@@ -804,8 +806,7 @@ void JPADrawExecCallBack::exec(const JPADrawContext* pDC) {
 /* 80264C4C-80264C88       .text exec__19JPADrawExecCallBackFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawExecCallBack::exec(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
     JPABaseEmitter* pbe = pDC->pbe;
-    if (ptcl->mpCallBack2 != NULL)
-        ptcl->mpCallBack2->draw(pbe, ptcl);
+    ptcl->drawCB(pbe);
 }
 
 /* 80264C88-80264DB8       .text calc__17JPADrawCalcScaleXFPC14JPADrawContextP15JPABaseParticle */
@@ -872,24 +873,26 @@ void JPADrawCalcScaleAnmTimingNormal::calc(const JPADrawContext* pDC, JPABasePar
 
 /* 802652A4-80265374       .text calc__32JPADrawCalcScaleAnmTimingRepeatXFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawCalcScaleAnmTimingRepeatX::calc(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
-    s32 frame = ptcl->mCurFrame;
-    JPADrawContext::pcb->mScaleAnmTiming = (frame % pDC->pesp->getAnmCycleX()) / (f32)pDC->pesp->getAnmCycleX();
+    JPADrawContext::pcb->mScaleAnmTiming = (ptcl->getAge() % pDC->pesp->getAnmCycleX()) / (f32)pDC->pesp->getAnmCycleX();
 }
 
 /* 80265374-80265444       .text calc__32JPADrawCalcScaleAnmTimingRepeatYFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawCalcScaleAnmTimingRepeatY::calc(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
-    s32 frame = ptcl->mCurFrame;
-    JPADrawContext::pcb->mScaleAnmTiming = (frame % pDC->pesp->getAnmCycleY()) / (f32)pDC->pesp->getAnmCycleY();
+    JPADrawContext::pcb->mScaleAnmTiming = (ptcl->getAge() % pDC->pesp->getAnmCycleY()) / (f32)pDC->pesp->getAnmCycleY();
 }
 
 /* 80265444-80265588       .text calc__33JPADrawCalcScaleAnmTimingReverseXFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawCalcScaleAnmTimingReverseX::calc(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
-    /* Nonmatching */
+    f32 odd = (ptcl->getAge() / pDC->pesp->getAnmCycleX()) & 1; // whether we're on an even or odd loop
+    f32 frame = (f32)(ptcl->getAge() % pDC->pesp->getAnmCycleX()) / pDC->pesp->getAnmCycleX();
+    JPADrawContext::pcb->mScaleAnmTiming = odd + (frame - odd * 2.0f * frame);
 }
 
 /* 80265588-802656CC       .text calc__33JPADrawCalcScaleAnmTimingReverseYFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawCalcScaleAnmTimingReverseY::calc(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
-    /* Nonmatching */
+    f32 odd = (ptcl->getAge() / pDC->pesp->getAnmCycleY()) & 1; // whether we're on an even or odd loop
+    f32 frame = (f32)(ptcl->getAge() % pDC->pesp->getAnmCycleY()) / pDC->pesp->getAnmCycleY();
+    JPADrawContext::pcb->mScaleAnmTiming = odd + (frame - odd * 2.0f * frame);
 }
 
 /* 802656CC-80265734       .text calc__19JPADrawCalcColorPrmFPC14JPADrawContextP15JPABaseParticle */
@@ -910,21 +913,26 @@ void JPADrawCalcColorCopyFromEmitter::calc(const JPADrawContext* pDC, JPABasePar
 
 /* 802657E8-80265880       .text calc__30JPADrawCalcColorAnmFrameNormalFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawCalcColorAnmFrameNormal::calc(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
-    s32 tick = ptcl->mCurFrame;
-    s32 frame = (tick < pDC->pbsp->getColorRegAnmMaxFrm()) ? (s32)ptcl->mCurFrame : pDC->pbsp->getColorRegAnmMaxFrm();
+    s32 frame = (ptcl->getAge() < pDC->pbsp->getColorRegAnmMaxFrm()) ? ptcl->getAge() : pDC->pbsp->getColorRegAnmMaxFrm();
     JPADrawContext::pcb->mColorAnmFrame = frame;
 }
 
 /* 80265880-80265918       .text calc__30JPADrawCalcColorAnmFrameRepeatFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawCalcColorAnmFrameRepeat::calc(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
-    s32 tick = ptcl->mCurFrame;
+    s32 tick = ptcl->getAge();
     s32 frame = ((ptcl->mLoopOffset & pDC->pbsp->getColLoopOffset()) + tick) % (pDC->pbsp->getColorRegAnmMaxFrm() + 1);
     JPADrawContext::pcb->mColorAnmFrame = frame;
 }
 
 /* 80265918-802659C4       .text calc__31JPADrawCalcColorAnmFrameReverseFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawCalcColorAnmFrameReverse::calc(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
-    /* Nonmatching */
+    s32 loopOffset = pDC->pbsp->getColLoopOffset();
+    loopOffset = ptcl->mLoopOffset & loopOffset;
+    s32 maxFrame = pDC->pbsp->getColorRegAnmMaxFrm();
+    s32 t = loopOffset + ptcl->getAge();
+    s32 odd = (t / maxFrame) & 1;
+    s32 frame = t % maxFrame;
+    JPADrawContext::pcb->mColorAnmFrame = frame + (odd * maxFrame) - 2 * (odd * frame);
 }
 
 /* 802659C4-80265A90       .text calc__29JPADrawCalcColorAnmFrameMergeFPC14JPADrawContextP15JPABaseParticle */
@@ -957,27 +965,26 @@ void JPADrawCalcAlpha::calc(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
 
 /* 80265C40-80265D54       .text calc__27JPADrawCalcAlphaFlickNrmSinFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawCalcAlphaFlickNrmSin::calc(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
-    /* Nonmatching */
-    f32 sin = JMASSin((((s32)ptcl->mCurFrame) * 16384) * ptcl->mAlphaWaveRandom * (1.0f - pDC->pesp->getAlphaWaveParam1()));
-    ptcl->mAlphaOut *= ptcl->mAlphaWaveRandom * ((sin - 1.0f) * 0.5f) * pDC->pesp->getAlphaWaveParam3() + 1.0f;
+    f32 sin = JMASSin((ptcl->getAge() * 16384) * ptcl->mAlphaWaveRandom * (1.0f - pDC->pesp->getAlphaWaveParam1()));
+    ptcl->mAlphaOut *= ptcl->mAlphaWaveRandom * (((sin - 1.0f) * 0.5f) * pDC->pesp->getAlphaWaveParam3()) + 1.0f;
     if (ptcl->mAlphaOut < 0.0f)
         ptcl->mAlphaOut = 0.0f;
 }
 
 /* 80265D54-80265EC4       .text calc__27JPADrawCalcAlphaFlickAddSinFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawCalcAlphaFlickAddSin::calc(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
-    /* Nonmatching */
-    f32 theta = (((s32)ptcl->mCurFrame) * 16384) * ptcl->mAlphaWaveRandom;
+    /* Nonmatching - operand swap */
+    f32 theta = (ptcl->getAge() * 16384) * ptcl->mAlphaWaveRandom;
     f32 sin2 = JMASSin(theta * (1.0f - pDC->pesp->getAlphaWaveParam2()));
     f32 sin1 = JMASSin(theta * (1.0f - pDC->pesp->getAlphaWaveParam1()));
-    ptcl->mAlphaOut *= (ptcl->mAlphaWaveRandom * (pDC->pesp->getAlphaWaveParam3() * (sin2 + sin1) - 2.0f) * 0.5f + 2.0f) * 0.5f;
+    ptcl->mAlphaOut *= (ptcl->mAlphaWaveRandom * ((((sin1 + sin2) - 2.0f) * 0.5f) * pDC->pesp->getAlphaWaveParam3()) + 2.0f) * 0.5f;
     if (ptcl->mAlphaOut < 0.0f)
         ptcl->mAlphaOut = 0.0f;
 }
 
 /* 80265EC4-80266048       .text calc__28JPADrawCalcAlphaFlickMultSinFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawCalcAlphaFlickMultSin::calc(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
-    f32 theta = (((s32)ptcl->mCurFrame) * 16384) * ptcl->mAlphaWaveRandom;
+    f32 theta = (ptcl->getAge() * 16384) * ptcl->mAlphaWaveRandom;
     f32 mul3 = (pDC->pesp->getAlphaWaveParam3() * 0.5f) * ptcl->mAlphaWaveRandom;
     f32 sin2 = JMASSin(theta * (1.0f - pDC->pesp->getAlphaWaveParam2()));
     f32 sin1 = JMASSin(theta * (1.0f - pDC->pesp->getAlphaWaveParam1()));
@@ -988,29 +995,39 @@ void JPADrawCalcAlphaFlickMultSin::calc(const JPADrawContext* pDC, JPABasePartic
 
 /* 80266048-80266100       .text calc__32JPADrawCalcTextureAnmIndexNormalFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawCalcTextureAnmIndexNormal::calc(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
-    /* Nonmatching */
-    s32 idx = ((s32)ptcl->mCurFrame < (pDC->pbsp->getTextureAnmKeyNum() - 1)) ? (pDC->pbsp->getTextureAnmKeyNum() - 1) : (s32)ptcl->mCurFrame;
+    s32 idx = ((pDC->pbsp->getTextureAnmKeyNum() - 1) < (s32)ptcl->getAge()) ? (pDC->pbsp->getTextureAnmKeyNum() - 1) : ptcl->getAge();
     ptcl->mTexIdx = pDC->pTexIdx[pDC->pbsp->getTextureIndex(idx)];
 }
 
 /* 80266100-802661B4       .text calc__32JPADrawCalcTextureAnmIndexRepeatFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawCalcTextureAnmIndexRepeat::calc(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
-    /* Nonmatching */
+    s32 tick = ptcl->getAge();
+    ptcl->mTexIdx = pDC->pTexIdx[pDC->pbsp->getTextureIndex(((ptcl->mLoopOffset & pDC->pbsp->getTexLoopOffset()) + tick) % pDC->pbsp->getTextureAnmKeyNum())];
 }
 
 /* 802661B4-80266284       .text calc__33JPADrawCalcTextureAnmIndexReverseFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawCalcTextureAnmIndexReverse::calc(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
-    /* Nonmatching */
+    s32 loopOffset = pDC->pbsp->getTexLoopOffset();
+    loopOffset = ptcl->mLoopOffset & loopOffset;
+    s32 maxFrame = pDC->pbsp->getTextureAnmKeyNum() - 1;
+    s32 t = loopOffset + ptcl->getAge();
+    s32 odd = (t / maxFrame) & 1;
+    s32 frame = t % maxFrame;
+    ptcl->mTexIdx = pDC->pTexIdx[pDC->pbsp->getTextureIndex(frame + (odd * maxFrame) - 2 * (odd * frame))];
 }
 
 /* 80266284-8026636C       .text calc__31JPADrawCalcTextureAnmIndexMergeFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawCalcTextureAnmIndexMerge::calc(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
-    /* Nonmatching */
+    s32 maxFrame = pDC->pbsp->getTextureAnmKeyNum();
+    s32 start = ptcl->mLoopOffset & pDC->pbsp->getTexLoopOffset();
+    s32 frame = (s32)(start + maxFrame * ptcl->mCurNormTime) % maxFrame;
+    ptcl->mTexIdx = pDC->pTexIdx[pDC->pbsp->getTextureIndex(frame)];
 }
 
 /* 8026636C-8026640C       .text calc__32JPADrawCalcTextureAnmIndexRandomFPC14JPADrawContextP15JPABaseParticle */
 void JPADrawCalcTextureAnmIndexRandom::calc(const JPADrawContext* pDC, JPABaseParticle* ptcl) {
-    /* Nonmatching */
+    s32 start = ptcl->mLoopOffset & pDC->pbsp->getTexLoopOffset();
+    ptcl->mTexIdx = pDC->pTexIdx[pDC->pbsp->getTextureIndex(start % pDC->pbsp->getTextureAnmKeyNum())];
 }
 
 /* 8026640C-80266420       .text calc__24JPADrawCalcChildAlphaOutFPC14JPADrawContextP15JPABaseParticle */

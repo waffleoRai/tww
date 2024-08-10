@@ -24,13 +24,7 @@
 #include "f_pc/f_pc_base.h"
 
 class fopAc_ac_c;
-
-class dMesg_tControl : public JMessage::TControl {
-public:
-    dMesg_tControl();
-
-    /* 0x3C */ u8 field_0x3C[0x74 - 0x3C];
-};  // Size: 0x74
+class dMesg_tControl;
 
 class dDemo_actor_c : public JStage::TActor {
 public:
@@ -41,7 +35,7 @@ public:
     void* getP_BtpData(const char*);
     void* getP_BrkData(const char*);
     void* getP_BtkData(const char*);
-    void getPrm_Morf();
+    f32 getPrm_Morf();
     void JSGSetData(u32, const void*, u32);
     void JSGSetTranslation(const Vec&);
     void JSGSetScaling(const Vec&);
@@ -71,7 +65,7 @@ public:
         dst->z = cM_sht2d(mRotation.z);
     }
 
-    bool checkEnable(u16 mask) { return mFlags & mask; }
+    u32 checkEnable(u16 mask) { return mFlags & mask; }
     csXyz* getRatate() { return &mRotation; }
     u32 getShapeId() { return mShapeId; }
 

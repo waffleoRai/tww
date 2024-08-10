@@ -94,7 +94,7 @@ void dPa_J3DmodelEmitter_c::draw() {
             f32 sq = mtx1[0][1]*mtx1[0][1] + mtx1[1][1]*mtx1[1][1] + mtx1[2][1]*mtx1[2][1];
             if (!cM3d_IsZero(sq)) {
                 if (!cM3d_IsZero(sq)) {
-                    f32 mag = sqrtf(sq);
+                    f32 mag = std::sqrtf(sq);
                     mtx1[0][1] *= mag;
                     mtx1[1][1] *= mag;
                     mtx1[2][1] *= mag;
@@ -431,7 +431,7 @@ void dPa_simpleEcallBack::executeAfter(JPABaseEmitter* param_1) {
                     particle->setOffsetPosition(simpleData->mPos.x, simpleData->mPos.y, simpleData->mPos.z);
                     if (simpleData->mbAffectedByWind) {
                         static dPa_windPcallBack l_windPcallBack;
-                        particle->mpCallBack2 = &l_windPcallBack;
+                        particle->setCallBackPtr(&l_windPcallBack);
                     }
                 }
             }
@@ -716,8 +716,16 @@ void dPa_control_c::setSimpleLand(cBgS_PolyInfo&, const cXyz*, const csXyz*, f32
 }
 
 /* 8007DA58-8007DAA8       .text checkAtrCodeEffect__13dPa_control_cFi */
-void dPa_control_c::checkAtrCodeEffect(int) {
-    /* Nonmatching */
+s32 dPa_control_c::checkAtrCodeEffect(int code) {
+    if (code == dBgS_Attr_WATER_e) {
+        return 0x23;
+    } else if (code == dBgS_Attr_GRASS_e) {
+        return 0x24;
+    } else if (code != dBgS_Attr_UNK1B_e && code != dBgS_Attr_ICE_e && code != dBgS_Attr_GIANT_FLOWER_e && code != dBgS_Attr_CARPET_e) {
+        return 0x2022;
+    } else {
+        return -1;
+    }
 }
 
 /* 8007DAA8-8007DB34       .text setNormalStripes__13dPa_control_cFUsPC4cXyzPC5csXyzPC4cXyzUcUs */
@@ -884,7 +892,7 @@ void dPa_waveEcallBack::executeAfter(JPABaseEmitter* emitter) {
     rot.z = 0;
     emitter->setGlobalRotation(rot);
     
-    if (fabsf(speed - mVel) > mVelSpeed) {
+    if (std::fabsf(speed - mVel) > mVelSpeed) {
         if (speed - mVel > 0.0f) {
             speed = mVel + mVelSpeed;
         } else {

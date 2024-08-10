@@ -981,6 +981,14 @@ inline void dComIfGs_offCompleteCollectMap(int i_no) {
     g_dComIfG_gameInfo.save.getPlayer().getMap().offCompleteMap(i_no - 1);
 }
 
+inline void dComIfGs_onSaveArriveGridForAgb(int i_no) {
+    g_dComIfG_gameInfo.save.getPlayer().getMap().onSaveArriveGridForAgb(i_no);
+}
+
+inline BOOL dComIfGs_isSaveArriveGridForAgb(int i_no) {
+    return g_dComIfG_gameInfo.save.getPlayer().getMap().isSaveArriveGridForAgb(i_no);
+}
+
 inline u8 dComIfGs_getArrowNum() {
     return g_dComIfG_gameInfo.save.getPlayer().getItemRecord().getArrowNum();
 }
@@ -1258,6 +1266,11 @@ inline u8 dComIfGs_getOptVibration() {
 
 inline void dComIfGs_setOptVibration(u8 vib) {
     g_dComIfG_gameInfo.save.getPlayer().getConfig().setVibration(vib);
+}
+
+/* Not present in debug maps, imitates TP version */
+inline u8 dComIfGs_checkOptVibration() {
+    return g_dComIfG_gameInfo.save.getPlayer().getConfig().checkVibration();
 }
 
 inline BOOL dComIfGs_isTbox(int i_no) {
@@ -1747,6 +1760,10 @@ inline dSv_reserve_c* dComIfGs_getPReserve() {
 
 inline u8* dComIfGs_getPEventBit() {
     return g_dComIfG_gameInfo.save.getEvent().getPEventBit();
+}
+
+inline void dComIfGs_setCardToMemory(u8* i_cardPtr, int i_dataNum) {
+    g_dComIfG_gameInfo.save.card_to_memory((char*)i_cardPtr, i_dataNum);
 }
 
 u8 dComIfGs_checkGetItemNum(u8 i_itemNo);
@@ -3398,6 +3415,8 @@ inline void dComIfGp_particle_draw2DmenuBack(JPADrawInfo* inf) { if (g_dComIfG_g
 inline u32 dComIfGp_particle_getParticleNum() { return g_dComIfG_gameInfo.play.getParticle()->getParticleNum(); }
 inline u32 dComIfGp_particle_getEmitterNum() { return g_dComIfG_gameInfo.play.getParticle()->getEmitterNum(); }
 inline JKRHeap* dComIfGp_particle_getCommonHeap() { return g_dComIfG_gameInfo.play.getParticle()->getHeap(); }
+
+inline s32 dComIfGp_particle_checkAtrCodeEffect(int code) { return g_dComIfG_gameInfo.play.getParticle()->checkAtrCodeEffect(code); }
 
 /**
  * === ATTENTION ===

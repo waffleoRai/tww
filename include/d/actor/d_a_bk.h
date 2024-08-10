@@ -26,7 +26,8 @@ public:
     /* 0x02C8 */ s16 m02C8;
     /* 0x02CA */ s16 m02CA;
     /* 0x02CC */ s16 m02CC;
-    /* 0x02CE */ u8 m02CE[0x02D0 - 0x02CE];
+    /* 0x02CE */ s8 m02CE;
+    /* 0x02CF */ u8 m02CF[0x02D0 - 0x02CF];
     /* 0x02D0 */ J3DModel* m02D0;
     /* 0x02D4 */ u8 m02D4;
     /* 0x02D5 */ u8 m02D5;
@@ -95,7 +96,8 @@ public:
     /* 0x1190 */ cXyz m1190;
     /* 0x119C */ cXyz m119C;
     /* 0x11A8 */ cXyz m11A8;
-    /* 0x11B4 */ u8 m11B4[0x11CC - 0x11B4];
+    /* 0x11B4 */ u8 m11B4[0x11C0 - 0x11B4];
+    /* 0x11C0 */ cXyz m11C0;
     /* 0x11CC */ cXyz m11CC;
     /* 0x11D8 */ u8 m11D8[0x11F0 - 0x11D8];
     /* 0x11F0 */ u8 m11F0;
@@ -125,14 +127,18 @@ public:
     /* 0x1226 */ u8 m1226[0x1228 - 0x1226];
     /* 0x1228 */ s16 m1228;
     /* 0x122A */ s16 m122A;
-    /* 0x122C */ u8 m122C[0x1230 - 0x122C];
+    /* 0x122C */ s8 m122C;
     /* 0x1230 */ J3DMaterialTable* m1230;
     /* 0x1234 */ s8 m1234;
-    /* 0x1235 */ u8 m1235[0x1264 - 0x1235];
+    /* 0x1236 */ s16 m1236;
+    /* 0x1238 */ cXyz m1238;
+    /* 0x1244 */ cXyz m1244;
+    /* 0x1250 */ u8 m1250[0x1260 - 0x1250];
+    /* 0x1260 */ f32 m1260;
     /* 0x1264 */ enemyice mEnemyIce;
     /* 0x161C */ enemyfire mEnemyFire;
     /* 0x1844 */ JntHit_c* mpJntHit;
-};
+};  // Size: 0x1848
 
 class bkHIO_c : public JORReflexible {
 public:

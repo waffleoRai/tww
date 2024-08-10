@@ -40,7 +40,7 @@ static Vec dummy_2080 = {1.0f, 1.0f, 1.0f};
 static u8 dummy_1811[] = {0x02, 0x00, 0x02, 0x01};
 static f64 dummy4[2] = {3.0, 0.5};
 
-static int bk_at_kind[] = { 0, 1, 0 };
+static dCcG_At_Spl bk_at_kind[] = { dCcG_At_Spl_UNK0, dCcG_At_Spl_UNK1, dCcG_At_Spl_UNK0 };
 static int bk_attack_ready_SE[] = { JA_SE_CV_BK_KAMAE, JA_SE_CV_BK_KAMAE, -0xDCF }; // TODO what is -0xDCF?
 static int bk_attack_go_SE[] = { JA_SE_CV_BK_ATTACK_S, JA_SE_CV_BK_ATTACK_L, -0xDCF }; // TODO what is -0xDCF?
 static int bk_attack_AP[] = { 1, 2, 1 };
@@ -695,9 +695,9 @@ static fpc_ProcID search_wepon(bk_class* i_this) {
             sp18.x = r25->current.pos.x - i_this->eyePos.x;
             sp18.y = 50.0f + r25->current.pos.y - i_this->eyePos.y;
             sp18.z = r25->current.pos.z - i_this->eyePos.z;
-            f32 f4 = sqrtf(sp18.x*sp18.x + sp18.z*sp18.z);
+            f32 f4 = std::sqrtf(sp18.x*sp18.x + sp18.z*sp18.z);
             if (f4 < f29 && !daBk_other_bg_check(i_this, r25)) {
-                if (fabsf(r25->current.pos.y + 50.0f - i_this->eyePos.y) <= l_bkHIO.m038) {
+                if (std::fabsf(r25->current.pos.y + 50.0f - i_this->eyePos.y) <= l_bkHIO.m038) {
                     s16 angleDiff = i_this->m0330 - cM_atan2s(sp18.x, sp18.z);
                     if (angleDiff < 0) {
                         angleDiff = -angleDiff;
@@ -708,8 +708,8 @@ static fpc_ProcID search_wepon(bk_class* i_this) {
                     cMtx_YrotS(*calc_mtx, -i_this->current.angle.y);
                     cXyz sp0C;
                     MtxPosition(&sp18, &sp0C);
-                    if (fabsf(sp0C.x) < l_bkHIO.m03C &&
-                        fabsf(sp0C.y) < l_bkHIO.m040 &&
+                    if (std::fabsf(sp0C.x) < l_bkHIO.m03C &&
+                        std::fabsf(sp0C.y) < l_bkHIO.m040 &&
                         sp0C.z > l_bkHIO.m048 &&
                         sp0C.z < l_bkHIO.m044
                     ) {
@@ -774,13 +774,13 @@ static fopAc_ac_c* search_bomb(bk_class* i_this, BOOL r26) {
             cXyz sp1C;
             sp1C.x = r24->current.pos.x - i_this->current.pos.x;
             sp1C.z = r24->current.pos.z - i_this->current.pos.z;
-            f32 f0 = sqrtf(sp28.x*sp28.x + sp28.z*sp28.z);
-            f32 f5 = sqrtf(sp1C.x*sp1C.x + sp1C.z*sp1C.z);
+            f32 f0 = std::sqrtf(sp28.x*sp28.x + sp28.z*sp28.z);
+            f32 f5 = std::sqrtf(sp1C.x*sp1C.x + sp1C.z*sp1C.z);
             if (f0 < f29 && !(f5 > 30.0f + i_this->mPlayerDistance) &&
                 !(daBk_other_bg_check(i_this, r24) && r26)
             ) {
                 if (r26) {
-                    if (fabsf(r24->current.pos.y + 50.0f - i_this->eyePos.y) <= l_bkHIO.m038) {
+                    if (std::fabsf(r24->current.pos.y + 50.0f - i_this->eyePos.y) <= l_bkHIO.m038) {
                         s16 angleDiff = i_this->m0330 - cM_atan2s(sp28.x, sp28.z);
                         if (angleDiff < 0) {
                             angleDiff = -angleDiff;
@@ -791,8 +791,8 @@ static fopAc_ac_c* search_bomb(bk_class* i_this, BOOL r26) {
                         cMtx_YrotS(*calc_mtx, -i_this->current.angle.y);
                         cXyz sp10;
                         MtxPosition(&sp28, &sp10);
-                        if (fabsf(sp10.x) < l_bkHIO.m03C &&
-                            fabsf(sp10.y) < l_bkHIO.m040 &&
+                        if (std::fabsf(sp10.x) < l_bkHIO.m03C &&
+                            std::fabsf(sp10.y) < l_bkHIO.m040 &&
                             sp10.z > l_bkHIO.m048 &&
                             sp10.z < l_bkHIO.m044
                         ) {
@@ -855,7 +855,7 @@ static BOOL daBk_player_bg_check(bk_class* i_this, cXyz* r22) {
     if (search_sp != 0 || i_this->mType == 0xA) {
         return FALSE;
     }
-    if (i_this->dr.m713 == 0 && fabsf(player->speedF) < 0.1f && player->checkGrabWear()) {
+    if (i_this->dr.m713 == 0 && std::fabsf(player->speedF) < 0.1f && player->checkGrabWear()) {
         return TRUE;
     }
     dBgS_LinChk linChk;
@@ -881,7 +881,7 @@ static BOOL daBk_player_view_check(bk_class* i_this, cXyz* r30, s16 r27, s16 r31
     if (daBk_player_bg_check(i_this, r30)) {
         return FALSE;
     }
-    if (fabsf(player->current.pos.y + 50.0f - i_this->eyePos.y) > l_bkHIO.m038) {
+    if (std::fabsf(player->current.pos.y + 50.0f - i_this->eyePos.y) > l_bkHIO.m038) {
         return FALSE;
     }
     s16 angleDiff = i_this->m0330 - r27;
@@ -899,8 +899,8 @@ static BOOL daBk_player_view_check(bk_class* i_this, cXyz* r30, s16 r27, s16 r31
     sp14.z = r30->z - i_this->current.pos.z;
     cXyz sp08;
     MtxPosition(& sp14, &sp08);
-    if (fabsf(sp08.x) < l_bkHIO.m03C &&
-        fabsf(sp08.y) < l_bkHIO.m040 &&
+    if (std::fabsf(sp08.x) < l_bkHIO.m03C &&
+        std::fabsf(sp08.y) < l_bkHIO.m040 &&
         sp08.z > l_bkHIO.m048 &&
         sp08.z < l_bkHIO.m044
     ) {
@@ -999,7 +999,7 @@ static void path_check(bk_class* i_this, u8 r19) {
             f32 distX = i_this->current.pos.x - pnt->mPos.x;
             f32 distY = i_this->current.pos.y - pnt->mPos.y;
             f32 distZ = i_this->current.pos.z - pnt->mPos.z;
-            if (sqrtf(distX*distX + distY*distY + distZ*distZ) < f0) {
+            if (std::sqrtf(distX*distX + distY*distY + distZ*distZ) < f0) {
                 if (r19) {
                     i_this->m1216 = j;
                 } else {
@@ -1101,7 +1101,7 @@ static void jyunkai(bk_class* i_this) {
         i_this->dr.m4D0 = cM_atan2s(sp10.x, sp10.z);
         
         if (i_this->m1215 != 0 && (i_this->m0B30 != 0 || i_this->m11F3 != 0)) {
-            if (sqrtf(sp10.x*sp10.x + sp10.z*sp10.z) < f31 * 0.25f * 2.0f) {
+            if (std::sqrtf(sp10.x*sp10.x + sp10.z*sp10.z) < f31 * 0.25f * 2.0f) {
                 if (i_this->ppd->mpPnt[i_this->m1216].mArg3 == 3) {
                     wait_set(i_this);
                     i_this->dr.m004 = 2;
@@ -1109,7 +1109,7 @@ static void jyunkai(bk_class* i_this) {
                     i_this->dr.m004 = -1;
                 }
             }
-        } else if (sqrtf(sp10.x*sp10.x + sp10.z*sp10.z) < f31 * 0.25f * 2.0f ||
+        } else if (std::sqrtf(sp10.x*sp10.x + sp10.z*sp10.z) < f31 * 0.25f * 2.0f ||
             (
                 i_this->m0300[2] == 0 && (
                     i_this->dr.mAcch.ChkWallHit() ||
@@ -1331,7 +1331,7 @@ static void stand(bk_class* i_this) {
     case 0x34:
         sp28 = i_this->home.pos - i_this->current.pos;
         i_this->dr.m4D0 = cM_atan2s(sp28.x, sp28.z);
-        if (sqrtf(sp28.x*sp28.x + sp28.z*sp28.z) < l_bkHIO.m054 * 0.25f * 5.0f) {
+        if (std::sqrtf(sp28.x*sp28.x + sp28.z*sp28.z) < l_bkHIO.m054 * 0.25f * 5.0f) {
             i_this->dr.m004 = 0;
         }
         cLib_addCalcAngleS2(&i_this->current.angle.y, i_this->dr.m4D0, 4, 0x1000);
@@ -1546,7 +1546,7 @@ static void stand2(bk_class* i_this) {
         sp24 = i_this->home.pos - i_this->current.pos;
 temp_568:
         i_this->dr.m4D0 = cM_atan2s(sp24.x, sp24.z);
-        if (sqrtf(sp24.x*sp24.x + sp24.z*sp24.z) < l_bkHIO.m054 * 0.25f * 5.0f) {
+        if (std::sqrtf(sp24.x*sp24.x + sp24.z*sp24.z) < l_bkHIO.m054 * 0.25f * 5.0f) {
             if (i_this->dr.m004 == 0x3C) {
                 i_this->dr.m004 = 0;
             } else if (i_this->m1216 == 0) {
@@ -1607,7 +1607,95 @@ temp_568:
 
 /* 00005D40-00006218       .text path_run__FP8bk_class */
 static void path_run(bk_class* i_this) {
-    /* Nonmatching */
+    i_this->dr.m710 = 0;
+    
+    switch (i_this->dr.m004) {
+    case 0:
+        anm_init(i_this, BK_BCK_BK_RUN, 10.0f, J3DFrameCtrl::LOOP_REPEAT_e, l_bkHIO.m070, BK_BAS_BK_RUN);
+        i_this->dr.m004 = 1;
+        // Fall-through
+    case 1:
+        dPath__Point* point = &i_this->ppd->mpPnt[i_this->m1216];
+        f32 x = point->mPos.x + i_this->m0320.x;
+        f32 z = point->mPos.z + i_this->m0320.z;
+        cXyz sp0C;
+        sp0C.x = x - i_this->current.pos.x;
+        sp0C.z = z - i_this->current.pos.z;
+        i_this->dr.m4D0 = cM_atan2s(sp0C.x, sp0C.z);
+        
+        if (std::sqrtf(sp0C.x*sp0C.x + sp0C.z*sp0C.z) < 100.0f) {
+            i_this->m1216 += i_this->m1217;
+            if (i_this->m1216 >= (s8)i_this->ppd->m_num) {
+                i_this->m1216 = i_this->ppd->m_num - 1;
+                i_this->m1217 = -1;
+                i_this->m121C = 1;
+            } else if (i_this->m1216 < 0) {
+                i_this->m1216 = 0;
+                i_this->m1217 = 1;
+                i_this->m121C = 1;
+            }
+        }
+        
+        if (i_this->m0300[1] == 0) {
+            i_this->m0300[1] = cM_rndF(50.0f) + 30.0f;
+            i_this->m0320.x = cM_rndFX(50.0f);
+            i_this->m0320.z = cM_rndFX(50.0f);
+        }
+        
+        if (i_this->dr.mAcch.ChkGroundHit()) {
+            s16 maxStep = 0x600;
+            if (i_this->m120C != 0) {
+                maxStep = 0x2000;
+            }
+            cLib_addCalcAngleS2(&i_this->current.angle.y, i_this->dr.m4D0, 4, maxStep);
+        }
+        
+        if (i_this->m120C == 0) {
+            i_this->speedF = l_bkHIO.m054;
+            if (i_this->m0300[2] == 0) {
+                i_this->m0300[2] = cM_rndF(100.0f) + 50.0f;
+                anm_init(i_this, BK_BCK_BK_JUMP1, 2.0f, J3DFrameCtrl::LOOP_ONCE_e, 1.0f, BK_BAS_BK_JUMP1);
+                i_this->m120C = 1;
+                i_this->m1210 = 0;
+            }
+        } else {
+            switch (i_this->m1210) {
+            case 0:
+                i_this->speedF = l_bkHIO.m054 * 1.2f;
+                if (i_this->dr.mAcch.ChkGroundHit() && i_this->mpMorf->isStop()) {
+                    anm_init(i_this, BK_BCK_BK_JUMP2, 0.0f, J3DFrameCtrl::LOOP_ONCE_e, 1.0f, BK_BAS_BK_JUMP2);
+                    i_this->m1210 = 1;
+                    i_this->m034C = l_bkHIO.m00C + 2;
+                    i_this->m034E = 4;
+                }
+                break;
+            case 1:
+                i_this->speedF = 0.0f;
+                if (i_this->dr.mAcch.ChkGroundHit() && i_this->mpMorf->isStop()) {
+                    i_this->m1210 = 0;
+                    anm_init(i_this, BK_BCK_BK_JUMP1, 2.0f, J3DFrameCtrl::LOOP_ONCE_e, 1.0f, BK_BAS_BK_JUMP1);
+                    i_this->speed.y = cM_rndF(REG8_F(7) + 10.0f) + 65.0f + REG8_F(8);
+                    fopAcM_monsSeStart(i_this, JA_SE_CV_BK_JUMP, 0);
+                }
+                
+                if (i_this->m0300[2] == 0) {
+                    i_this->m0300[2] = cM_rndF(100.0f) + 50.0f;
+                    anm_init(i_this, BK_BCK_BK_RUN, 10.0f, J3DFrameCtrl::LOOP_REPEAT_e, l_bkHIO.m070, BK_BAS_BK_RUN);
+                    i_this->m120C = 0;
+                }
+                break;
+            }
+        }
+        break;
+    }
+    
+    if (i_this->mPlayerDistance < l_bkHIO.m028 &&
+        daBk_player_view_check(i_this, &i_this->dr.m714->current.pos, i_this->m0332, l_bkHIO.m034)
+    ) {
+        i_this->dr.mState = 4;
+        i_this->m0300[1] = 0;
+        i_this->dr.m004 = 0;
+    }
 }
 
 /* 00006218-0000647C       .text attack_set__FP8bk_classUc */
@@ -1782,7 +1870,7 @@ static void fight_run(bk_class* i_this) {
             i_this->m0300[1] = 20.0f + cM_rndF(20.0f);
             break;
         }
-        if ((i_this->m02DD & 0xC) == 0 && fabsf(stickPosX) > 0.1f) {
+        if ((i_this->m02DD & 0xC) == 0 && std::fabsf(stickPosX) > 0.1f) {
             if (i_this->m0B30 != 0 || i_this->m11F3 != 0) {
                 anm_init(i_this, BK_BCK_BK_WALK2, 10.0f, J3DFrameCtrl::LOOP_REPEAT_e, 1.0f, BK_BAS_BK_WALK2);
             } else {
@@ -1975,7 +2063,7 @@ static void fight_run(bk_class* i_this) {
     }
     i_this->m02DD = ground_4_check(i_this, 4, i_this->current.angle.y, 90.0f + REG6_F(7));
     if (i_this->m0314 != 0) {
-        if (fabsf(i_this->speedF) < 30.0f) {
+        if (std::fabsf(i_this->speedF) < 30.0f) {
             if (i_this->m0318 == 0) {
                 i_this->dr.m710 = 3;
             } else if (i_this->m0318 == 1) {
@@ -2008,8 +2096,45 @@ static void fight_run(bk_class* i_this) {
 }
 
 /* 000073B8-000075E8       .text yari_hit_check__FP8bk_class */
-static void yari_hit_check(bk_class* i_this) {
-    /* Nonmatching */
+static fopAc_ac_c* yari_hit_check(bk_class* i_this) {
+    i_this->m11F0 = 0;
+    i_this->m11C0 = i_this->m11A8;
+    if (i_this->m0B7A < 0) { return NULL; }
+    
+    if (i_this->m0B5C == 2) {
+        i_this->m11A8 = i_this->dr.m100[0xE];
+    } else {
+        i_this->m11A8 = i_this->m1178;
+    }
+    
+    if (i_this->m0B78 != 0) { return NULL; }
+    if (i_this->m0B64 < i_this->m0B68 || i_this->m0B64 > i_this->m0B6C) { return NULL; }
+    
+    i_this->m11F0 <<= 1;
+    i_this->m1040.SetAtSpl(bk_at_kind[i_this->m0B5C]);
+    if ((int)i_this->m0B64 == (int)i_this->m0B68 && bk_attack_go_SE[i_this->m0B5C] != -0xDCF) {
+        fopAcM_monsSeStart(i_this, bk_attack_go_SE[i_this->m0B5C], 0);
+    }
+    
+    if (i_this->m11F1 == 0) {
+        i_this->m1040.StartCAt(i_this->m11A8);
+        i_this->m11F1 += 1;
+    } else {
+        i_this->m1040.MoveCAt(i_this->m11A8);
+        dComIfG_Ccsp()->Set(&i_this->m1040);
+        if (i_this->m02D5 != 0) {
+            // Using the dComIfG_Ccsp inline here breaks the match.
+            // dComIfG_Ccsp()->SetMass(&i_this->m1040, 3);
+            g_dComIfG_gameInfo.play.mCcS.SetMass(&i_this->m1040, 3);
+        }
+        if (i_this->m1040.ChkAtHit()) {
+            i_this->m0B78 = 5;
+            cCcD_Obj* hitObj = i_this->m1040.GetAtHitObj();
+            return hitObj->GetAc();
+        }
+    }
+    
+    return NULL;
 }
 
 /* 000075E8-00007EF4       .text fight__FP8bk_class */
@@ -2327,7 +2452,7 @@ static BOOL daBk_Execute(bk_class* i_this) {
                     if (r23 == NULL) {
                         i_this->m0300[0] = 50;
                         i_this->m0310 = 20;
-                        if (fabsf(i_this->speedF) > 10.0f) {
+                        if (std::fabsf(i_this->speedF) > 10.0f) {
                             another_hit = 1;
                         } else {
                             i_this->scale.x = i_this->scale.y = i_this->scale.z = 0.5f;
